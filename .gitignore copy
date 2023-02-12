@@ -6,11 +6,13 @@ __pycache__/
 # C extensions
 *.so
 
-# logs and dataset
+# logs
+
 wandb/
 log/
 log_tensorboard/
 saved/
+dataset/
 dataset/gowalla/
 dataset/amazon_books/
 dataset/yelp2018/
