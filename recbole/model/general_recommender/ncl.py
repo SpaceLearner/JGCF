@@ -17,7 +17,6 @@ from recbole.model.abstract_recommender import GeneralRecommender
 from recbole.model.init import xavier_uniform_initialization
 from recbole.model.loss import BPRLoss, EmbLoss
 from recbole.utils import InputType
-from functools import partial
 
 from .PolyConv import PolyConvFrame, JacobiConv
 
@@ -62,7 +61,7 @@ class NCL(GeneralRecommender):
         conv_fn = partial(JacobiConv, a=config["a"], b=config["b"])
         # conv_fn = ChebyshevConv
         
-        self.graph_conv = PolyConvFrame(conv_fn=conv_fn, depth=self.n_layers, alpha=2.0)
+        self.graph_conv = PolyConvFrame(conv_fn=conv_fn, depth=self.n_layers, alpha=2)
 
         self.mf_loss = BPRLoss()
         self.reg_loss = EmbLoss()
@@ -136,24 +135,21 @@ class NCL(GeneralRecommender):
         )
         A._update(data_dict)
         # norm adj matrix
-        L = sp.coo_matrix(A)
-        
-        # A = L
-        # for i in range(self.n_layers):
-        #     L = L @ L
-        #     A += L
-        # A.data = A.data / self.n_layers
-        # L = A
-
-        # row = L.row
-        # col = L.col
-        # i = torch.LongTensor(np.array([row, col])).to(self.device)
-        # data = torch.FloatTensor(L.data).to(self.device)
-        # SparseL = SparseTensor(row=i[0], col=i[1], value=data, sparse_sizes=(self.n_users+self.n_items, self.n_users+self.n_items)) # torch.sparse.FloatTensor(i, data, torch.Size(L.shape))
-        # SparseL = gcn_norm(SparseL, num_nodes=self.n_users+self.n_items)
-        # for i in range(self.)
-        edge_index = torch.tensor([L.row, L.col], dtype=torch.long, device=self.device)
-        return edge_index
+        sumArr = (A > 0).sum(axis=1)
+        # add epsilon to avoid divide by zero Warning
+        diag = np.array(sumArr.flatten())[0] + 1e-7
+        diag = np.power(diag, -0.5)
+        self.diag = torch.from_numpy(diag).to(self.device)
+        D = sp.diags(diag)
+        L = D @ A @ D
+        # covert norm_adj matrix to tensor
+        L = sp.coo_matrix(L)
+        row = L.row
+        col = L.col
+        i = torch.LongTensor(np.array([row, col]))
+        data = torch.FloatTensor(L.data)
+        SparseL = torch.sparse.FloatTensor(i, data, torch.Size(L.shape))
+        return SparseL
 
     def get_ego_embeddings(self):
         r"""Get the embedding of users and items and combine to an embedding matrix.
@@ -169,25 +165,20 @@ class NCL(GeneralRecommender):
     def forward(self):
         all_embeddings = self.get_ego_embeddings()
         embeddings_list = [all_embeddings]
-        
-        
-        # for layer_idx in range(max(self.n_layers, self.hyper_layers * 2)):
-        #     all_embeddings = torch.sparse.mm(self.norm_adj_mat, all_embeddings)
-        #     embeddings_list.append(all_embeddings)
-        
-        embeddings_list = self.graph_conv(all_embeddings, self.norm_adj_mat, torch.ones(self.norm_adj_mat.shape[1], device=self.device))
+        print(self.hyper_layers)
+        for layer_idx in range(max(self.n_layers, self.hyper_layers * 2)):
+            all_embeddings = torch.sparse.mm(self.norm_adj_mat, all_embeddings)
+            embeddings_list.append(all_embeddings)
 
-        # lightgcn_all_embeddings = torch.stack(
-        #     embeddings_list[: self.n_layers + 1], dim=1
-        # )
-        
-        lightgcn_all_embeddings = torch.mean(embeddings_list, dim=1)
+        lightgcn_all_embeddings = torch.stack(
+            embeddings_list[: self.n_layers + 1], dim=1
+        )
+        lightgcn_all_embeddings = torch.mean(lightgcn_all_embeddings, dim=1)
 
         user_all_embeddings, item_all_embeddings = torch.split(
             lightgcn_all_embeddings, [self.n_users, self.n_items]
         )
-        
-        return user_all_embeddings, item_all_embeddings, embeddings_list.permute(1, 0, 2)
+        return user_all_embeddings, item_all_embeddings, embeddings_list
 
     def ProtoNCE_loss(self, node_embedding, user, item):
         user_embeddings_all, item_embeddings_all = torch.split(

@@ -24,11 +24,6 @@ import torch.nn.functional as F
 
 from torch_sparse import SparseTensor, matmul
 
-from tqdm import tqdm
-
-from .PolyConv import PolyConvFrame, JacobiConv
-
-from functools import partial
 
 
 class SGL(GeneralRecommender):
@@ -60,8 +55,6 @@ class SGL(GeneralRecommender):
         self.item_embedding = torch.nn.Embedding(self.n_items, self.embed_dim)
         self.reg_loss = EmbLoss()
         self.train_graph = self.csr2tensor(self.create_adjust_matrix(is_sub=False))
-        conv_fn = partial(JacobiConv, a=config["a"], b=config["b"])
-        self.graph_conv = PolyConvFrame(conv_fn=conv_fn, depth=self.n_layers, alpha=2.0, cached=False)
         self.restore_user_e = None
         self.restore_item_e = None
         self.apply(xavier_uniform_initialization)
@@ -184,30 +177,29 @@ class SGL(GeneralRecommender):
         Returns:
             torch.sparse.FloatTensor: Transformed sparse matrix.
         """
-        L = matrix.tocoo()
+        matrix = matrix.tocoo()
         # x = torch.sparse.FloatTensor(
         #     torch.LongTensor(np.array([matrix.row, matrix.col])),
         #     torch.FloatTensor(matrix.data.astype(np.float32)),
         #     matrix.shape,
         # ).to(self.device)
-        # x = SparseTensor(row=torch.tensor(matrix.row, dtype=torch.long, device=self.device), col=torch.tensor(matrix.col, dtype=torch.long, device=self.device), value=torch.tensor(matrix.data.astype(np.float32), device=self.device), sparse_sizes=matrix.shape)
-        edge_index = torch.tensor([L.row, L.col], dtype=torch.long, device=self.device)
-        return edge_index
+        x = SparseTensor(row=torch.tensor(matrix.row, dtype=torch.long, device=self.device), col=torch.tensor(matrix.col, dtype=torch.long, device=self.device), value=torch.tensor(matrix.data.astype(np.float32), device=self.device), sparse_sizes=matrix.shape)
+        return x
 
     def forward(self, graph):
         main_ego = torch.cat([self.user_embedding.weight, self.item_embedding.weight])
-        # all_ego = [main_ego]
-        # print(graph)
-        # if isinstance(graph, list):
-        #     for sub_graph in graph:
-        #         # sub_graph = from_torch_sparse(sub_graph.coalesce())
-        #         main_ego = matmul(sub_graph, main_ego)
-        #         all_ego.append(main_ego)
-        # else:
-        #     # graph = from_torch_sparse(graph.coalesce())
-        all_ego = self.graph_conv(main_ego, graph, torch.ones(graph.shape[1], device=self.device))
-        
-        # all_ego = torch.stack(all_ego, dim=1)
+        all_ego = [main_ego]
+        if isinstance(graph, list):
+            for sub_graph in graph:
+                # sub_graph = from_torch_sparse(sub_graph.coalesce())
+                main_ego = matmul(sub_graph, main_ego)
+                all_ego.append(main_ego)
+        else:
+            # graph = from_torch_sparse(graph.coalesce())
+            for i in range(self.n_layers):
+                main_ego = matmul(graph, main_ego)
+                all_ego.append(main_ego)
+        all_ego = torch.stack(all_ego, dim=1)
         all_ego = torch.mean(all_ego, dim=1, keepdim=False)
         user_emd, item_emd = torch.split(all_ego, [self.n_users, self.n_items], dim=0)
 
