@@ -131,7 +131,7 @@ class JGCF(GeneralRecommender):
         # self.output = torch.nn.Linear(self.latent_dim * 2, self.latent_dim)
         
         
-        self.mf_loss = BPRLoss()
+        self.mf_loss  = BPRLoss()
         self.reg_loss = EmbLoss()
 
         # storage variables for full sort evaluation acceleration
@@ -145,47 +145,6 @@ class JGCF(GeneralRecommender):
         # parameters initialization
         self.apply(xavier_uniform_initialization)
         self.other_parameter_name = ["restore_user_e", "restore_item_e"]
-        
-    def get_norm_mid_adj_mat(self):
-        
-        A = sp.dok_matrix(
-            (self.n_users + self.n_items, self.n_users + self.n_items), dtype=np.float32
-        )
-        inter_M = self.interaction_matrix
-        inter_M_t = self.interaction_matrix.transpose()
-        data_dict = dict(
-            zip(zip(inter_M.row, inter_M.col + self.n_users), [1] * inter_M.nnz)
-        )
-        data_dict.update(
-            dict(
-                zip(
-                    zip(inter_M_t.row + self.n_users, inter_M_t.col),
-                    [1] * inter_M_t.nnz,
-                )
-            )
-        )
-        A._update(data_dict)
-        # norm adj matrix
-        sumArr = (A > 0).sum(axis=1)
-        # add epsilon to avoid divide by zero Warning
-        diag = np.array(sumArr.flatten())[0] # + 1e-7
-        diag = np.power(diag, -0.5)
-        diag[np.isnan(diag)] = 0.0
-        D = sp.diags(diag)
-        L = D * A * D
-        # covert norm_adj matrix to tensor
-        L = sp.coo_matrix(L)
-        I = sp.eye(L.shape[0])
-        L = (I - L) @ (I + L)
-        L = L.tocoo()
-        row = L.row
-        col = L.col
-        i = torch.LongTensor(np.array([row, col]))
-        data = torch.FloatTensor(L.data)
-        
-        SparseL = SparseTensor(row=i[0], col=i[1], value=data, sparse_sizes=(self.n_users+self.n_items, self.n_users+self.n_items))
-        
-        return SparseL
 
     def get_norm_adj_mat(self):
         r"""Get the normalized interaction matrix of users and items.
@@ -217,23 +176,8 @@ class JGCF(GeneralRecommender):
             )
         )
         A._update(data_dict)
-        # norm adj matrix
-        # sumArr = (A > 0).sum(axis=1)
-        # # add epsilon to avoid divide by zero Warning
-        # diag = np.array(sumArr.flatten())[0] + 1e-7
-        # diag = np.power(diag, -0.5)
-        # D = sp.diags(diag)
-        # L = D * A * D
-        # covert norm_adj matrix to tensor
         L = A.tocoo()
-        # row = L.row
-        # col = L.col
-        # i = torch.LongTensor(np.array([row, col]))
-        # data = torch.FloatTensor(L.data)
-        # SparseL = torch.sparse.FloatTensor(i, data, torch.Size(L.shape))
         
-       # SparseL = SparseTensor(row=i[0], col=i[1], value=data, sparse_sizes=(self.n_users+self.n_items, self.n_users+self.n_items)) # torch.sparse.FloatTensor(i, data, torch.Size(L.shape))
-        # SparseL = gcn_norm(SparseL, num_nodes=self.n_users+self.n_items)
         edge_index = torch.tensor([L.row, L.col], dtype=torch.long, device=self.device)
         return edge_index
 
@@ -338,6 +282,7 @@ class JGCF(GeneralRecommender):
 
     def full_sort_predict(self, interaction):
         user = interaction[self.USER_ID]
+       
         if self.restore_user_e is None or self.restore_item_e is None:
             self.restore_user_e, self.restore_item_e = self.forward()
         # get user embedding from storage variable

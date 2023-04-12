@@ -6,18 +6,20 @@ load_col:
 
 seed: 2023
 
+log_wandb: True
+
 # model config
 embedding_size: 64
 
-a: 2.0
-b: 1.1
-alpha: 3.0
-beta: 0.1
-lr: 1e-3
+# a: 2.0
+# b: 1.1
+# alpha: 3.0
+# beta: 0.1
+# lr: 1e-3
 
-n_layers: 3
+# n_layers: 3
 
-reg_weight: 1e-5
+reg_weight: 1e-4
 use_power: True
 
 # Training and evaluation config

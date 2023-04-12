@@ -1,0 +1,56 @@
+# dataset config : General Recommendation
+USER_ID_FIELD: user_id
+ITEM_ID_FIELD: item_id
+load_col:
+    inter: [user_id, item_id]
+
+# benchmark_filename: ["train", "test"]
+
+# drop_out: 0.5
+# smooth_ratio: 0.05
+# rough_ratio: 0.005
+# beta: 4.0
+# feature_type: "both"
+
+user_inter_num_interval: "[0,inf)"
+item_inter_num_interval: "[0,inf)"
+
+seed: 2023
+
+gpu_id: 2
+
+# model config
+embedding_size: 64
+
+a: 2.0
+b: 1.0
+alpha: 3.0
+beta: 0.1
+lr: 1e-3
+
+n_layers: 3
+
+reg_weight: 1e-4
+use_power: True
+
+# Training and evaluation config
+epochs: 1000
+eval_step: 10
+train_batch_size: 4096
+eval_batch_size: 100000000
+stopping_step: 5
+train_neg_sample_args:
+    distribution: uniform
+    sample_num: 1
+    alpha: 1.0
+    dynamic: False
+    candidate_num: 0
+eval_args:
+    group_by: user
+    order: RO
+    split: {'RS': [0.8, 0.1, 0.1]}
+    mode: full
+metrics: ['Recall', 'NDCG']
+topk: [10,20,50]
+valid_metric: Recall@20
+metric_decimal_place: 4

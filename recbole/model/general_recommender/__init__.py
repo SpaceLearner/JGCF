@@ -31,3 +31,5 @@ from recbole.model.general_recommender.simplex import SimpleX
 from recbole.model.general_recommender.spectralconv import SpectralConv
 from recbole.model.general_recommender.gtn import GTN
 from recbole.model.general_recommender.jgcf import JGCF
+from recbole.model.general_recommender.hmlet import HMLET
+from recbole.model.general_recommender.gde import GDE

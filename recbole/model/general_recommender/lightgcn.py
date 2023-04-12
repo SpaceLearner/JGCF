@@ -254,6 +254,7 @@ class LightGCN(GeneralRecommender):
 
     def full_sort_predict(self, interaction):
         user = interaction[self.USER_ID]
+       #  print(user)
         if self.restore_user_e is None or self.restore_item_e is None:
             self.restore_user_e, self.restore_item_e = self.forward()
         # get user embedding from storage variable

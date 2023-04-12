@@ -12,12 +12,14 @@ recbole.quick_start
 ########################
 """
 import logging
+import torch
 from logging import getLogger
 
 import sys
 
 
 import pickle
+import pandas as pd
 from ray import tune
 
 from recbole.config import Config
@@ -71,6 +73,35 @@ def run_recbole(
 
     # dataset splitting
     train_data, valid_data, test_data = data_preparation(config, dataset)
+    
+    users = []
+    items = []
+    for idx, batch in enumerate(train_data):
+        users.append(batch["user_id"]-1)
+        items.append(batch["item_id"]-1)
+    users = torch.hstack(users).numpy()
+    items = torch.hstack(items).numpy()
+    df = pd.DataFrame({"user": users, "item":items})
+    df = df.sort_values(by=["user", "item"])
+    df.to_csv("/data/guojiayan/GitHub/GDE/datasets/citeulike/train_sparse.csv", index=False)
+    
+    users = []
+    items = []
+    for idx, batch in enumerate(valid_data):
+        # print(batch[1])
+        # print(batch[2])
+        # print(batch[3])
+        # break
+        # print(batch[1])
+        # print(batch[2])
+        # print(batch[3])
+        users.append(batch[2])
+        items.append(batch[3])
+    users = torch.hstack(users).numpy()
+    items = torch.hstack(items).numpy()
+    df = pd.DataFrame({"user": users, "item":items})
+    df = df.sort_values(by=["user", "item"])
+    df.to_csv("/data/guojiayan/GitHub/GDE/datasets/citeulike/test_sparse.csv", index=False)
 
     # model loading and initialization
     init_seed(config["seed"] + config["local_rank"], config["reproducibility"])

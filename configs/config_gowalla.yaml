@@ -16,7 +16,7 @@ b: 1.0
 alpha: 3.0
 beta: 0.1
 
-n_layers: 3
+# n_layers: 3
 
 reg_weight: 1e-4
 use_power: True

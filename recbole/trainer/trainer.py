@@ -520,6 +520,7 @@ class Trainer(AbstractTrainer):
 
     def _full_sort_batch_eval(self, batched_data):
         interaction, history_index, positive_u, positive_i = batched_data
+        # print(positive_u)
         try:
             # Note: interaction without item ids
             scores = self.model.full_sort_predict(interaction.to(self.device))
