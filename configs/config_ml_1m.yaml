@@ -6,18 +6,18 @@ load_col:
 
 # benchmark_filename: ["train", "test"]
 
-# drop_out: 0.5
-# smooth_ratio: 0.05
-# rough_ratio: 0.005
-# beta: 4.0
-# feature_type: "both"
+dropout_rate: 0.5
+smooth_ratio: 0.05
+rough_ratio: 0.005
+beta: 4.0
+feature_type: "both"
 
 user_inter_num_interval: "[0,inf)"
 item_inter_num_interval: "[0,inf)"
 
 seed: 2023
 
-gpu_id: 2
+gpu_id: 0
 
 # model config
 embedding_size: 64
@@ -25,10 +25,10 @@ embedding_size: 64
 a: 2.0
 b: 1.0
 alpha: 3.0
-beta: 0.1
+# beta: 0.1
 lr: 1e-3
 
-n_layers: 3
+n_layers: 2
 
 reg_weight: 1e-4
 use_power: True

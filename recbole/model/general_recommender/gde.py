@@ -61,7 +61,7 @@ class GDE(GeneralRecommender):
             user_adj_index = user_adj.nonzero().T
             adj_value = user_adj[user_adj_index[0], user_adj_index[1]]
             # print(user_adj.shape)
-            user_adj = torch.sparse_coo_tensor(indices=user_adj_index.cpu(), values=adj_value.cpu())
+            user_adj = torch.sparse_coo_tensor(indices=user_adj_index, values=adj_value)
             user_value, user_vec = cal_spectral_feature(Adj=user_adj, size=int(self.n_users*self.smooth_ratio))
             user_filter=self.weight_feature(user_value.to(self.device))
             user_vector=user_vec.to(self.device)
@@ -70,7 +70,7 @@ class GDE(GeneralRecommender):
             item_adj_index = item_adj.nonzero().T
             adj_value = item_adj[item_adj_index[0], item_adj_index[1]]
             
-            item_adj = torch.sparse_coo_tensor(indices=item_adj_index.cpu(), values=adj_value.cpu())
+            item_adj = torch.sparse_coo_tensor(indices=item_adj_index, values=adj_value)
             item_value, item_vec = cal_spectral_feature(Adj=item_adj, size=int(self.n_items * self.smooth_ratio))
             item_filter=self.weight_feature(item_value.to(self.device))
             item_vector=item_vec.to(self.device)
@@ -80,7 +80,7 @@ class GDE(GeneralRecommender):
             user_adj  = self.Adj.matmul(self.Adj.T).clip(max=1.0)
             user_adj_index = user_adj.nonzero().T
             adj_value = user_adj[user_adj_index[0], user_adj_index[1]]
-            user_adj = torch.sparse_coo_tensor(indices=user_adj_index.cpu(), values=adj_value.cpu())
+            user_adj = torch.sparse_coo_tensor(indices=user_adj_index, values=adj_value)
             user_value, user_vec     = cal_spectral_feature(Adj=user_adj, size=int(self.n_users*self.smooth_ratio))
             user_value_r, user_vec_r = cal_spectral_feature(Adj=self.Adj.matmul(self.Adj.T).clip(max=1.0), size=int(self.n_users*self.rough_ratio), largest=False)
             
@@ -92,7 +92,7 @@ class GDE(GeneralRecommender):
             item_adj_index = item_adj.nonzero().T
             adj_value = item_adj[item_adj_index[0], item_adj_index[1]]
             
-            item_adj = torch.sparse_coo_tensor(indices=item_adj_index.cpu(), values=adj_value.cpu())
+            item_adj = torch.sparse_coo_tensor(indices=item_adj_index, values=adj_value)
             item_value, item_vec     = cal_spectral_feature(Adj=item_adj, size=int(self.n_users*self.smooth_ratio))
             item_value_r, item_vec_r = cal_spectral_feature(Adj=item_adj, size=int(self.n_users*self.rough_ratio), largest=False)
             
