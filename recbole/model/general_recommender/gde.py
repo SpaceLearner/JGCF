@@ -39,6 +39,8 @@ class GDE(GeneralRecommender):
             num_embeddings=self.n_items, embedding_dim=self.latent_dim
         )
         
+        self.adaptive = config["adaptive"]
+        
         self.mf_loss = BPRLoss()
         self.reg_loss = EmbLoss()
         
@@ -183,10 +185,18 @@ class GDE(GeneralRecommender):
             neg_embeddings = (self.m(self.L_i[neg_item])*(1-self.drop_out)).mm(self.item_embedding.weight)
 
         # calculate BPR Loss
-        pos_scores = torch.mul(u_embeddings, pos_embeddings).sum(dim=1)
-        neg_scores = torch.mul(u_embeddings, neg_embeddings).sum(dim=1)
-        pos_scores = torch.max(pos_scores, torch.tensor(1e-12, device=self.device))
-        neg_scores = torch.max(neg_scores, torch.tensor(1e-12, device=self.device))
+        
+        if self.adaptive:
+            pos_scores = torch.mul(u_embeddings, pos_embeddings).sum(dim=1)
+            res_neg=(u_embeddings*neg_embeddings).sum(1)
+            neg_weight=(1-(1-res_neg.sigmoid().clamp(max=0.99)).log10()).detach()
+            neg_scores = neg_weight * res_neg
+        else:
+            pos_scores = torch.mul(u_embeddings, pos_embeddings).sum(dim=1)
+            neg_scores = torch.mul(u_embeddings, neg_embeddings).sum(dim=1)
+        
+        
+        
         mf_loss = self.mf_loss(pos_scores, neg_scores)
 
         # calculate BPR Loss
