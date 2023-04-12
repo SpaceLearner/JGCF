@@ -1,5 +1,15 @@
+import argparse
 from recbole.quick_start import run_recbole
 
-# run_recbole(model="LightGCN_Poly", dataset="TenRec", config_file_list=["config_tenrec.yaml"])
-
-run_recbole(model="GDE", dataset="ml_1m", config_file_list=["configs/config_ml_1m.yaml"])
+def main(args):
+    
+    run_recbole(model=args.model, dataset=args.dataset, config_file_list=["configs/config_{}.yaml".format(args.dataset.lower())])
+    
+if __name__ == "__main__":
+    
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--model",   default="JGCF", help="choose the model to use. ")
+    parser.add_argument("--dataset", default="gowalla", help="choose the dataset to use. ")
+    args = parser.parse_args()
+    
+    main(args)

@@ -4,32 +4,24 @@ ITEM_ID_FIELD: item_id
 load_col:
     inter: [user_id, item_id]
 
-beta: 4.0
-dropout_rate: 0.2
-smooth_ratio: 0.2
-rough_ratio: 0.0
-feature_type: "smoothed"
-
 user_inter_num_interval: "[0,inf)"
 item_inter_num_interval: "[0,inf)"
 
 seed: 2023
-
-gpu_id: 2
 
 # model config
 embedding_size: 64
 
 a: 1.0
 b: 1.1
-alpha: 5.0
-beta: 0.1
-lr: 1e-3
+alpha: 0.1
 
 n_layers: 1
 
 reg_weight: 1e-4
 use_power: True
+
+lr: 1e-3
 
 # Training and evaluation config
 epochs: 1000

@@ -4,30 +4,20 @@ ITEM_ID_FIELD: item_id
 load_col:
     inter: [user_id, item_id]
 
-# benchmark_filename: ["train", "test"]
-
-dropout_rate: 0.5
-smooth_ratio: 0.05
-rough_ratio: 0.005
-beta: 4.0
-feature_type: "both"
-
 user_inter_num_interval: "[0,inf)"
 item_inter_num_interval: "[0,inf)"
 
 seed: 2023
-
-gpu_id: 0
 
 # model config
 embedding_size: 64
 
 a: 2.0
 b: 1.0
-alpha: 3.0
-# beta: 0.1
+alpha: 0.1
 lr: 1e-3
 
+n_layers: 2
 n_layers: 2
 
 reg_weight: 1e-4

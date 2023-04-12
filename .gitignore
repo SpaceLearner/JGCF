@@ -15,6 +15,9 @@ dataset/gowalla/
 dataset/amazon_books/
 dataset/yelp2018/
 dataset/alibaba/
+dataset/Amazon_Books/
+dataset/gowalla_lightgcn/
+*.out
 
 # Distribution / packaging
 .Python

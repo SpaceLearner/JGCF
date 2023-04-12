@@ -4,23 +4,20 @@ ITEM_ID_FIELD: item_id
 load_col:
     inter: [user_id, item_id]
 
-log_wandb: True
+user_inter_num_interval: "[0,inf)"
+item_inter_num_interval: "[0,inf)"
 
 # model config
 embedding_size: 64
 
-# a: 0.0
-# b: 2.0
-# alpha: 3.0
-# beta: 0.1
+a: 0.0
+b: 2.0
+beta: 0.1
 
-# n_layers: 4
+n_layers: 4
 
 reg_weight: 1e-4
 use_power: True
-
-user_inter_num_interval: "[0,inf)"
-item_inter_num_interval: "[0,inf)"
 
 # Training and evaluation config
 epochs: 1000

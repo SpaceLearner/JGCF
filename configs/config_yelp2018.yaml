@@ -4,23 +4,25 @@ ITEM_ID_FIELD: item_id
 load_col:
     inter: [user_id, item_id]
 
-seed: 2023
+user_inter_num_interval: "[0,inf)"
+item_inter_num_interval: "[0,inf)"
 
-log_wandb: True
+seed: 2023
 
 # model config
 embedding_size: 64
 
-# a: 2.0
-# b: 1.1
-# alpha: 3.0
-# beta: 0.1
-# lr: 1e-3
+a: 2.0
+b: 1.1
+alpha: 0.1
 
-# n_layers: 3
+
+n_layers: 3
 
 reg_weight: 1e-4
 use_power: True
+
+lr: 1e-3
 
 # Training and evaluation config
 epochs: 1000

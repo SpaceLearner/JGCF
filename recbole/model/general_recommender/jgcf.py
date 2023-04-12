@@ -109,7 +109,7 @@ class JGCF(GeneralRecommender):
         self.reg_weight = config[
             "reg_weight"
         ]  # float32 type: the weight decay for l2 normalization
-        self.beta = config["beta"]
+        self.beta = config["alpha"]
         self.require_pow = config["require_pow"]
 
         # define layers and loss
@@ -120,16 +120,9 @@ class JGCF(GeneralRecommender):
             num_embeddings=self.n_items, embedding_dim=self.latent_dim
         )
         
-        conv_fn_low = partial(JacobiConv, a=config["a"], b=config["b"])
-        conv_fn_mid = partial(JacobiConv, a=config["a"], b=config["b"])
-        # conv_fn = ChebyshevConv
+        conv_fn = partial(JacobiConv, a=config["a"], b=config["b"])
         
-        self.graph_conv_low = PolyConvFrame(conv_fn=conv_fn_low, depth=self.n_layers, alpha=config["alpha"])
-        self.graph_conv_mid = PolyConvFrame(conv_fn=conv_fn_mid, depth=self.n_layers, alpha=config["alpha"], fixed=True)
-        # self.linear_mid = torch.nn.Linear(self.latent_dim, self.latent_dim)
-        
-        # self.output = torch.nn.Linear(self.latent_dim * 2, self.latent_dim)
-        
+        self.graph_conv_low = PolyConvFrame(conv_fn=conv_fn, depth=self.n_layers, alpha=3.0)
         
         self.mf_loss  = BPRLoss()
         self.reg_loss = EmbLoss()
@@ -196,43 +189,19 @@ class JGCF(GeneralRecommender):
         
         all_embeddings = self.get_ego_embeddings()
         
-        # all_embeddings = F.dropout(all_embeddings, p=0.1, training=self.training)
-        # embeddings_list = [all_embeddings]
-
-        # for layer_idx in range(self.n_layers):
-        #     all_embeddings = matmul(self.norm_adj_matrix, all_embeddings)
-        #     embeddings_list.append(all_embeddings)
-            
-        # lightgcn_all_embeddings = torch.stack(embeddings_list, dim=1)
-        # lightgcn_all_embeddings = torch.mean(lightgcn_all_embeddings, dim=1)
         all_embeddings_low = self.graph_conv_low(all_embeddings, self.norm_adj_matrix, torch.ones(self.norm_adj_matrix.shape[1], device=self.device))
         
         all_embeddings_low = all_embeddings_low.mean(1)
         
-        # all_embeddings_low[:, all_embeddings_low.shape[1] // 2:] = torch.tanh(all_embeddings_low[:, all_embeddings_low.shape[1] // 2:])
-        
-        # all_embeddings_mid = self.graph_conv_mid(all_embeddings, self.norm_adj_matrix, torch.ones(self.norm_adj_matrix.shape[1], device=self.device))
-        
-        # all_embeddings_mid = all_embeddings_mid.mean(1)
-        
         all_embeddings_mid = self.beta * all_embeddings - all_embeddings_low
         
-        # all_embeddings = (all_embeddings_low + all_embeddings_mid.tanh()) / 2
         all_embeddings = torch.hstack([all_embeddings_low, all_embeddings_mid])
-        
-        # all_embeddings = torch.hstack([all_embeddings_low,  all_embeddings_mid]) # .tanh()
-        
-        # all_embeddings = self.output(all_embeddings)
-        
+
         user_all_embeddings, item_all_embeddings = torch.split(
             all_embeddings, [self.n_users, self.n_items]
         )
         
-        # user_mid_embeddings, item_mid_embeddings = torch.split(
-        #     embeddings_act, [self.n_users, self.n_items]
-        # )
-        
-        return user_all_embeddings, item_all_embeddings# , user_mid_embeddings, item_mid_embeddings
+        return user_all_embeddings, item_all_embeddings
 
     def calculate_loss(self, interaction):
         # clear the storage variable when training
