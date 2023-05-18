@@ -27,7 +27,7 @@ lr: 1e-3
 epochs: 1000
 eval_step: 10
 train_batch_size: 4096
-eval_batch_size: 100000
+eval_batch_size: 10000000
 stopping_step: 5
 train_neg_sample_args:
     distribution: uniform
