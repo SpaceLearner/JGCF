@@ -36,9 +36,15 @@ unzip alibaba.zip
 python run.py --dataset alibaba
 ```
 
-## Empirical Experiments on More Datasets without Sampling
+## Citation
 
-<img decoding="async" src="./assets/ml_100k_spectral_trans.png" width="32%">
-<img decoding="async" src="./assets/ml1m_spectral_trans.png" width="31%">
-<img decoding="async" src="./assets/pinterest_spectral_trans.png" width="32%">
+If you find our work useful, please cite:
+
+@inproceedings{
+anonymous2023on,
+title={On Manipulating Signals of User-Item Graph: A Jacobi Polynomial-based Graph Collaborative Filtering},
+author={Jiayan, Guo, Lun Du, Xu Chen, Xiaojun Ma, Qiang Fu, Shi Han, Dongmei Zhang, Yan Zhang},
+booktitle={29th SIGKDD Conference on Knowledge Discovery and Data Mining},
+year={2023},
+}
 
