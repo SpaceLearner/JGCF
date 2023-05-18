@@ -39,7 +39,7 @@ python run.py --dataset alibaba
 ## Citation
 
 If you find our work useful, please cite:
-
+```
 @inproceedings{
 anonymous2023on,
 title={On Manipulating Signals of User-Item Graph: A Jacobi Polynomial-based Graph Collaborative Filtering},
@@ -47,4 +47,4 @@ author={Jiayan, Guo, Lun Du, Xu Chen, Xiaojun Ma, Qiang Fu, Shi Han, Dongmei Zha
 booktitle={29th SIGKDD Conference on Knowledge Discovery and Data Mining},
 year={2023},
 }
-
+```
