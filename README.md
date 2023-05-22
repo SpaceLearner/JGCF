@@ -36,7 +36,7 @@ unzip alibaba.zip
 python run.py --dataset alibaba
 ```
 
-### Benchmarking
+## Benchmarking
 
 ## Citation
 
