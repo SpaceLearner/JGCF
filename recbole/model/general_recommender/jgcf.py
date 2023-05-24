@@ -77,14 +77,9 @@ def gcn_norm(edge_index, edge_weight=None, num_nodes=None, improved=False,
 
 
 class JGCF(GeneralRecommender):
-    r"""LightGCN is a GCN-based recommender model.
+    r"""JGCF is a Jacobi Polynomial-based recommender model.
 
-    LightGCN includes only the most essential component in GCN — neighborhood aggregation — for
-    collaborative filtering. Specifically, LightGCN learns user and item embeddings by linearly
-    propagating them on the user-item interaction graph, and uses the weighted sum of the embeddings
-    learned at all layers as the final embedding.
-
-    We implement the model following the original author with a pairwise training mode.
+    We implement the model following common routine with a pairwise training mode.
     """
     input_type = InputType.PAIRWISE
 
