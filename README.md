@@ -38,6 +38,16 @@ python run.py --dataset alibaba
 
 ## Benchmarking
 
+Gowalla:
+| Syntax      | LightGCN (K=3) | JGCF (K=3) |
+| ----------- | ----------- | ----------- |
+| Recall@10   |   0.1382    |    *0.1574*   |
+|  NDCG@10    |   0.1003    |    *0.1145*   |
+| Recall@20   |   0.1983    |    *0.2232*   |
+|  NDCG@20    |   0.1175    |    *0.1332*   |
+| Recall@50   |   0.3067    |    *0.3406*   |
+|  NDCG@50    |   0.1438    |    *0.1619*   |
+
 ## Citation
 
 If you find our work useful, please cite:
